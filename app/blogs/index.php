@@ -1,6 +1,8 @@
 <?php
+session_start();
+
 function isLoggedIn(): bool {
-    return isset($_SESSION['user']);
+    return isset($_SESSION['user_id']);
 }
 
 function getDbConnexion(): PDO {
@@ -65,7 +67,7 @@ $comments = getComments($post['id']);
                 <div class="w-11/12 flex flex-row items-center justify-end space-x-4">
                     <a href="/" class="text-white">Homepage</a>
                     <?php if (isLoggedIn()): ?>
-                        <a href="/newPost.php" class="text-white">Create post</a>
+                        <a href="/blogs/new.php" class="text-white">Create post</a>
                         <a href="/profile.php" class="text-white">Profile</a>
                         <a href="/logout.php" class="text-white">Logout</a>
                     <?php else: ?>

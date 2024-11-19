@@ -1,8 +1,50 @@
 <?php
+session_start();
 
 function isLoggedIn(): bool {
-    return isset($_SESSION['user']);
+    return isset($_SESSION['user_id']);
 }
+
+function getDbConnexion(): PDO {
+    $host = 'php-oop-exercice-db';
+    $db = 'blog';
+    $user = 'root';
+    $password = 'password';
+
+    $dsn = "mysql:host=$host;dbname=$db;charset=UTF8";
+
+    return new PDO($dsn, $user, $password);
+}
+
+function login(string $email, string $password) {
+    $sql = "SELECT * FROM users WHERE email = :email";
+    $stmt = getDbConnexion()->prepare($sql);
+    $stmt->execute(['email' => $email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$user) {
+        return false;
+    }
+
+    if (!password_verify($password, $user['password'])) {
+        return false;
+    }
+
+    $_SESSION['user_id'] = $user['id'];
+    header('Location: /profile.php');
+    exit;
+}
+
+$success = null;
+
+if($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    $success = login($email, $password);
+}
+
+
 
 ?>
 
@@ -20,7 +62,7 @@ function isLoggedIn(): bool {
                 <div class="w-11/12 flex flex-row items-center justify-end space-x-4">
                     <a href="/" class="text-white">Homepage</a>
                     <?php if (isLoggedIn()): ?>
-                        <a href="/newPost.php" class="text-white">Create post</a>
+                        <a href="/blogs/new.php" class="text-white">Create post</a>
                         <a href="/profile.php" class="text-white">Profile</a>
                         <a href="/logout.php" class="text-white">Logout</a>
                     <?php else: ?>
@@ -30,7 +72,16 @@ function isLoggedIn(): bool {
                 </div>
             </div>
             <div class="flex flex-col w-11/12 items-center justify-start">
-                <h1 class="text-4xl">Wonderful blog</h1>
+                <h1 class="text-4xl">Login</h1>
+                <form action="/login.php" method="post" class="flex flex-col w-1/2 space-y-4">
+                    <?php if ($success === false): ?>
+                        <p class="text-red-500">Invalid credentials</p>
+                    <?php endif; ?>
+
+                    <input type="email" name="email" placeholder="Email" class="p-2 border border-gray-300 rounded">
+                    <input type="password" name="password" placeholder="Password" class="p-2 border border-gray-300 rounded">
+                    <button type="submit" class="p-2 bg-blue-500 text-white rounded">Login</button>
+                </form>
 
             </div>
         </div>        
