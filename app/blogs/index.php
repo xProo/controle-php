@@ -1,0 +1,96 @@
+<?php
+function isLoggedIn(): bool {
+    return isset($_SESSION['user']);
+}
+
+function getDbConnexion(): PDO {
+    $host = 'php-oop-exercice-db';
+    $db = 'blog';
+    $user = 'root';
+    $password = 'password';
+
+    $dsn = "mysql:host=$host;dbname=$db;charset=UTF8";
+
+    return new PDO($dsn, $user, $password);
+}
+
+function getBlogPost(): array {
+    $sql = "SELECT posts.*, users.name, users.id as user_id
+    FROM posts 
+    INNER JOIN users ON posts.user_id = users.id
+    WHERE posts.id = :id
+    ";
+    $stmt = getDbConnexion()->prepare($sql);
+    $stmt->execute(['id' => $_GET['id']]);
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $post;
+}
+
+function getAuthor(int $id): array {
+    $sql = "SELECT * FROM users WHERE id = :id";
+    $stmt = getDbConnexion()->prepare($sql);
+    $stmt->execute(['id' => $id]);
+    $author = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $author;
+}
+
+function getComments(int $postId): array {
+    $sql = "SELECT comments.*, users.name as user_name, users.id as user_id FROM comments INNER JOIN users ON comments.user_id = users.id WHERE post_id = :post_id";
+    $stmt = getDbConnexion()->prepare($sql);
+    $stmt->execute(['post_id' => $postId]);
+    $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return $comments;
+}
+
+$post = getBlogPost();
+$author = getAuthor($post['user_id']);
+$comments = getComments($post['id']);
+
+?>
+
+<!doctype html>
+<html class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body  class="min-h-full">
+    <main class="min-h-full">
+        <div class="flex flex-col min-h-full w-full items-center justify-start">
+            <div class="flex flex-row w-full h-24 bg-gray-900 items-center justify-center">
+                <div class="w-11/12 flex flex-row items-center justify-end space-x-4">
+                    <a href="/" class="text-white">Homepage</a>
+                    <?php if (isLoggedIn()): ?>
+                        <a href="/newPost.php" class="text-white">Create post</a>
+                        <a href="/profile.php" class="text-white">Profile</a>
+                        <a href="/logout.php" class="text-white">Logout</a>
+                    <?php else: ?>
+                        <a href="/login.php"  class="text-white">Login</a>
+                        <a href="/register.php"  class="text-white">Register</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="flex flex-col w-11/12 items-center justify-start">
+                <h1 class="text-4xl"><?= $post['title'] ?> </h1>
+                <a href="/users.php?id=<?= $author['id'] ?>" class="p">By <?= $author['name'] ?></a>
+
+                <div class="flex flex-col w-full items-center justify-start space-y-4">
+                    <p><?= $post['content'] ?></p>
+                    <h2 class="text-2xl">Comments</h2>
+                    <?php foreach($comments as $comment): ?>
+                        <div class="flex flex-col w-full items-center justify-start border border-gray-300 p-4">
+                            <a href="/users.php?id=<?= $comment['user_id'] ?>" class="p">By <?= $comment['user_name'] ?></a>
+                            <p><?= $comment['content'] ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                
+            </div>
+        </div>        
+    </main>
+</body>
+</html>
