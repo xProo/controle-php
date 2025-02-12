@@ -51,6 +51,30 @@ $post = getBlogPost();
 $author = getAuthor($post['user_id']);
 $comments = getComments($post['id']);
 
+function postComment(string $content) {
+    if(isLoggedIn() === false) {
+        return;
+    }
+
+    $post = getBlogPost();
+
+    $comment = [
+        'content' => $content,
+        'post_id' => $post['id'],
+        'user_id' => $_SESSION['user_id'],
+    ];
+
+    $sql = 'INSERT INTO comments (content, post_id, user_id) VALUES (:content, :post_id, :user_id)';
+    $stmt = getDbConnexion()->prepare($sql);
+    $stmt->execute($comment);
+    header('Location: /blogs/index.php?id=' . $post['id']);
+}
+
+if($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $comment = $_POST['comment'];
+
+    postComment($comment);
+}
 ?>
 
 <!doctype html>
@@ -83,6 +107,12 @@ $comments = getComments($post['id']);
                 <div class="flex flex-col w-full items-center justify-start space-y-4">
                     <p><?= $post['content'] ?></p>
                     <h2 class="text-2xl">Comments</h2>
+                    <?php if (isLoggedIn()): ?>
+                        <form action="/blogs/index.php?id=<?php echo $post['id'] ?>" method="post" class="flex flex-col w-1/2 space-y-4">
+                            <input type="text" name="comment" placeholder="Comment" class="p-2 border border-gray-300 rounded">
+                            <button type="submit" class="p-2 bg-blue-500 text-white rounded">Comment</button>
+                        </form>
+                    <?php endif; ?>
                     <?php foreach($comments as $comment): ?>
                         <div class="flex flex-col w-full items-center justify-start border border-gray-300 p-4">
                             <a href="/users.php?id=<?= $comment['user_id'] ?>" class="p">By <?= $comment['user_name'] ?></a>
