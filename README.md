@@ -39,22 +39,22 @@ Every major feature of a framework (routing, ORM, database maintaining, ...) is 
 
 ```bash
 # Step 1 : download the project
-git clone https://github.com/<your-username>/php-oop-exercices
+git clone https://github.com/<your-username>/php-oop-exercice
 
-cd php-oop-exercices
+cd php-oop-exercice
 
 # Step 2 : initialize the docker containers
 docker compose up -d --build
 
-docker compose exec php-oop-exercices composer install
+docker compose exec php-oop-exercice composer install
 
-docker compose exec php-oop-exercices composer dump-autoload
+docker compose exec php-oop-exercice composer dump-autoload
 
 # Step 3 : initialize the database
 # open app/mysql/blog.sql
 # copy the content of the file
 
-docker compose exec php-oop-exercices-db mysql -u root -p
+docker compose exec php-oop-exercice-db mysql -u root -p
 
 # the root password is `password`
 
@@ -65,7 +65,7 @@ show tables;
 
 # exit the mysql CLI
 
-docker compose exec php-oop-exercices php ./fixtures/generate.php
+docker compose exec php-oop-exercice php ./fixtures/generate.php
 
 ```
 
