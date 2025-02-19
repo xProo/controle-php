@@ -8,71 +8,82 @@ use App\Database\DbConnexion;
 
 class HomepageController extends AbstractController
 {
+    private const DEFAULT_PAGE_SIZE = 10;
+    private const DEFAULT_PAGE = 1;
+
     public function process(Request $request): Response
     {
-        return $this->homepage();
+        return $this->handleHomepage();
     }
 
-    private function homepage()
+    private function handleHomepage(): Response
     {
-        $db = (new DbConnexion())->execute();
+        $articles = $this->fetchArticles();
+        return new Response(
+            json_encode($articles), 
+            200, 
+            ['Content-Type' => 'application/json']
+        );
+    }
 
-        function getPage(): int
-        {
-            return $_GET['page'] ?? 1;
-        }
+    private function fetchArticles(): array
+    {
+        $pagination = $this->calculatePagination();
+        $offset = ($pagination['currentPage'] - 1) * $this->getPageSize();
 
-        function getLimit(): int
-        {
-            return $_GET['limit'] ?? 10;
-        }
+        $connection = $this->getDatabaseConnection();
+        $query = "
+            SELECT 
+                p.id,
+                p.title,
+                p.created_at,
+                u.name,
+                u.id as user_id
+            FROM posts p
+            INNER JOIN users u ON p.user_id = u.id
+            ORDER BY p.created_at DESC
+            LIMIT :limit
+            OFFSET :offset
+        ";
 
+        $stmt = $connection->prepare($query);
+        $stmt->bindValue(':limit', $this->getPageSize(), \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
 
-        function getPostsCount(): int
-        {
-            $sql = "SELECT COUNT(*) FROM posts";
-            $stmt = getDbConnexion()->query($sql);
-            $count = $stmt->fetchColumn();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 
-            return $count;
-        }
+    private function calculatePagination(): array
+    {
+        $totalArticles = $this->getTotalArticlesCount();
+        $pageSize = $this->getPageSize();
 
-        function getPagination(): array
-        {
-            $postsCount = getPostsCount();
-            $postsPerPage = getLimit();
-            $pagesCount = ceil($postsCount / $postsPerPage);
+        return [
+            'pagesCount' => ceil($totalArticles / $pageSize),
+            'currentPage' => $this->getCurrentPage(),
+        ];
+    }
 
-            return [
-                'pagesCount' => $pagesCount,
-                'currentPage' => getPage(),
-            ];
-        }
+    private function getTotalArticlesCount(): int
+    {
+        $connection = $this->getDatabaseConnection();
+        $query = "SELECT COUNT(*) FROM posts";
+        return (int) $connection->query($query)->fetchColumn();
+    }
 
-        function getPosts(): array
-        {
-            $db = (new DbConnexion())->execute();
+    private function getCurrentPage(): int
+    {
+        return isset($_GET['page']) ? (int) $_GET['page'] : self::DEFAULT_PAGE;
+    }
 
-            $currentPage = getPage();
-            $postsPerPage = getLimit();
-            $offset = ($currentPage - 1) * $postsPerPage;
+    private function getPageSize(): int
+    {
+        return isset($_GET['limit']) ? (int) $_GET['limit'] : self::DEFAULT_PAGE_SIZE;
+    }
 
-            $sql = "SELECT posts.id, posts.title, posts.created_at, users.name, users.id as user_id
-            FROM posts 
-            INNER JOIN users ON posts.user_id = users.id
-            ORDER BY posts.created_at DESC
-            LIMIT 10
-            OFFSET $offset;
-            ";
-            $stmt = $db->query($sql);
-            $posts = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-            return $posts;
-        }
-
-        $getPage = getPage();
-        $getPosts = getPosts();
-
-        return new Response(json_encode($getPosts), 200, ['Content-Type' => 'application/json']);
+    private function getDatabaseConnection(): \PDO
+    {
+        return (new DbConnexion())->execute();
     }
 }

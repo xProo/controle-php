@@ -1,27 +1,27 @@
 [
-    {
-        "path": "/homepage",
-        "methods": ["GET"],
-        "controller": "HomepageController"
-    },
-    {
-        "path": "/logout",
-        "methods": ["POST"],
-        "controller": "LogoutController"
-    },
-    {
-        "path": "/register",
-        "methods": ["GET", "POST"],
-        "controller": "RegisterController"
-    },
-    {
-        "path": "/login",
-        "methods": ["GET", "POST"],
-        "controller": "LoginController"
-    },
-    {
-        "path": "/update-profile",
-        "methods": ["PATCH"],
-        "controller": "UpdateProfileController"
-    }
+  {
+    "path": "/",
+    "methods": ["GET"],
+    "controller": "HomepageController"
+  },
+  {
+    "path": "/logout",
+    "methods": ["POST"],
+    "controller": "LogoutController"
+  },
+  {
+    "path": "/register",
+    "methods": ["GET", "POST"],
+    "controller": "RegisterController"
+  },
+  {
+    "path": "/login",
+    "methods": ["GET", "POST"],
+    "controller": "LoginController"
+  },
+  {
+    "path": "/update-profile",
+    "methods": ["PATCH"],
+    "controller": "UpdateProfileController"
+  }
 ]

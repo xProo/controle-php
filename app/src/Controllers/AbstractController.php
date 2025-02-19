@@ -8,21 +8,29 @@ use App\Http\Response;
 abstract class AbstractController{
     abstract public function process(Request $request): Response;
 
-    protected function render(string $template, array $data = []): Response
+    protected function renderView(string $viewName, array $viewData = []): Response
     {
         $response = new Response();
-        extract($data);
+        
+        // Extraction des données dans la portée locale
+        if (!empty($viewData)) {
+            extract($viewData);
+        }
+        
+        // Capture du contenu
         ob_start();
-        require_once __DIR__ . "/../Views/html/start.html";
-        require_once __DIR__ . "/../Views/$template.html";
-        require_once __DIR__ . "/../Views/html/end.html";
+
+  
+        
+        // Configuration de la réponse
         $response->setContent(ob_get_clean());
         $response->addHeader('Content-Type', 'text/html');
 
         return $response;
     }
 
-    public function isLoggedIn(): bool {
-        return isset($_SESSION['user_id']);
+    protected function checkAuthentication(): bool 
+    {
+        return !empty($_SESSION['user_id']);
     }
 }
