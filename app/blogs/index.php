@@ -1,5 +1,10 @@
 <?php
+require_once '../vendor/autoload.php'; // Assurez-vous que le chemin est correct
+
 session_start();
+
+use App\Models\Post;
+use App\Models\Comment;
 
 function isLoggedIn(): bool {
     return isset($_SESSION['user_id']);
@@ -47,9 +52,14 @@ function getComments(int $postId): array {
     return $comments;
 }
 
-$post = getBlogPost();
-$author = getAuthor($post['user_id']);
-$comments = getComments($post['id']);
+$postId = $_GET['id'] ?? 0;
+$post = new Post('', '', 0, $postId); // Récupérez le post par ID ici
+
+// Récupérer le post depuis la base de données (ajoutez une méthode pour cela dans la classe Post)
+$postData = $post->getPostById($postId); // Implémentez cette méthode dans la classe Post
+
+$author = getAuthor($postData['user_id']);
+$comments = getComments($postId);
 
 function postComment(string $content) {
     if(isLoggedIn() === false) {
@@ -70,10 +80,12 @@ function postComment(string $content) {
     header('Location: /blogs/index.php?id=' . $post['id']);
 }
 
-if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $comment = $_POST['comment'];
-
-    postComment($comment);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isLoggedIn()) {
+    $commentContent = $_POST['comment'];
+    $comment = new Comment($commentContent, $postId, $_SESSION['user_id']);
+    $comment->save();
+    header('Location: /blogs/index.php?id=' . $postId);
+    exit;
 }
 ?>
 
@@ -101,14 +113,14 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
             <div class="flex flex-col w-11/12 items-center justify-start">
-                <h1 class="text-4xl"><?= $post['title'] ?> </h1>
+                <h1 class="text-4xl"><?= $postData['title'] ?> </h1>
                 <a href="/users.php?id=<?= $author['id'] ?>" class="p">By <?= $author['name'] ?></a>
 
                 <div class="flex flex-col w-full items-center justify-start space-y-4">
-                    <p><?= $post['content'] ?></p>
+                    <p><?= $postData['content'] ?></p>
                     <h2 class="text-2xl">Comments</h2>
                     <?php if (isLoggedIn()): ?>
-                        <form action="/blogs/index.php?id=<?php echo $post['id'] ?>" method="post" class="flex flex-col w-1/2 space-y-4">
+                        <form action="/blogs/index.php?id=<?php echo $postId ?>" method="post" class="flex flex-col w-1/2 space-y-4">
                             <input type="text" name="comment" placeholder="Comment" class="p-2 border border-gray-300 rounded">
                             <button type="submit" class="p-2 bg-blue-500 text-white rounded">Comment</button>
                         </form>
