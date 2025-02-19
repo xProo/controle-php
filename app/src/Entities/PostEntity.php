@@ -71,46 +71,39 @@ class PostsEntity extends AbstractEntity
 
     public function getPostsCount(): int
     {
-        $db = (new DbConnexion())->execute();
-        $sql = "SELECT COUNT(*) FROM posts";
-        $stmt = $db->query($sql);
-        $count = $stmt->fetchColumn();
-
-        return $count;
+        $connexion = getDbConnexion();
+        $query = "SELECT COUNT(id) as total FROM posts";
+        $result = $connexion->query($query);
+        return (int) $result->fetchColumn();
     }
 
     public function getPagination(): array
     {
-        $postsCount = $this->getPostsCount();
-        $postsPerPage = $this->getLimit();
-        $pagesCount = ceil($postsCount / $postsPerPage);
+        $total = $this->getPostsCount();
+        $items_per_page = $this->getLimit();
+        $total_pages = ceil($total / $items_per_page);
 
         return [
-            'pagesCount' => $pagesCount,
+            'pagesCount' => $total_pages,
             'currentPage' => $this->getPage(),
         ];
     }
 
     public function getPosts(): array
     {
-        $db = (new DbConnexion())->execute();
+        $connexion = (new DbConnexion())->execute();
+        $page = $this->getPage();
+        $items = $this->getLimit();
+        $skip = ($page - 1) * $items;
 
-        $currentPage = $this->getPage();
-        $postsPerPage = $this->getLimit();
-        $offset = ($currentPage - 1) * $postsPerPage;
-
-        $sql = "SELECT posts.id, posts.title, posts.created_at, users.name, users.id as user_id
-            FROM posts 
-            INNER JOIN users ON posts.user_id = users.id
-            ORDER BY posts.created_at DESC
-            LIMIT :limit
-            OFFSET :offset";
-            
-        $stmt = $db->prepare($sql);
-        $stmt->bindValue(':limit', $postsPerPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-        
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $query = "SELECT p.id, p.title, p.created_at, u.name, u.id as user_id
+            FROM posts p
+            INNER JOIN users u ON p.user_id = u.id
+            ORDER BY p.created_at DESC
+            LIMIT 10
+            OFFSET $skip;
+            ";
+        $result = $connexion->query($query);
+        return $result->fetchAll(\PDO::FETCH_ASSOC);
     }
 }
