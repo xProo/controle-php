@@ -29,6 +29,7 @@ To differentiate the API from the rest of the application, every API routes shou
 ### Notation
 
 Every new class you will create is worth 3 points. It will be judged on :
+
 - its implementation (is it working properly, does it respect coding standards, ...)
 - its usefulness (is the class has an utility in the app)
 - how you used it in the app (is it called properly)
@@ -87,14 +88,16 @@ The title of your Pull Request must contain your name, you firstname and you cla
 
 ## Features
 
-| Feature                                 | Route                          |
-|-----------------------------------------|--------------------------------|
-| List of blogs                           | /                              |
-| Login                                   | /login.php                     |
-| Register                                | /register.php                  |
-| Read a blog and the associated comments | /index.php?id=<blog-id>        |
-| Post a new comment                      | /index.php?id=<blog-id>        |
-| List the blogs of a user                | /users.php?id=<user-id>        |
-| Update profile                          | /profile.php                   |
-| Create a new blog                       | /blogs/new.php                 |
-| Logout                                  | /logout.php                    |
+| Feature                                 | Route                   |
+| --------------------------------------- | ----------------------- |
+| List of blogs                           | /                       |
+| Login                                   | /login.php              |
+| Register                                | /register.php           |
+| Read a blog and the associated comments | /index.php?id=<blog-id> |
+| Post a new comment                      | /index.php?id=<blog-id> |
+| List the blogs of a user                | /users.php?id=<user-id> |
+| Update profile                          | /profile.php            |
+| Create a new blog                       | /blogs/new.php          |
+| Logout                                  | /logout.php             |
+
+j'ai un code en imperatif et je dois le transformer en poo

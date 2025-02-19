@@ -1,48 +1,31 @@
 <?php
-session_start();
 
-function isLoggedIn(): bool {
-    return isset($_SESSION['user_id']);
-}
-function getDbConnexion(): PDO {
-    $host = 'php-oop-exercice-db';
-    $db = 'blog';
-    $user = 'root';
-    $password = 'password';
+require_once __DIR__ . '/vendor/autoload.php';
 
-    $dsn = "mysql:host=$host;dbname=$db;charset=UTF8";
+use App\Controllers\AuthController;
+use App\Services\Session;
 
-    return new PDO($dsn, $user, $password);
-}
+// Activer l'affichage des erreurs pour le débogage
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-function register(string $username, string $email, string $password) {
-    $sql = "SELECT * FROM users WHERE email = :email OR name = :username";
-    $stmt = getDbConnexion()->prepare($sql);
-    $stmt->execute(['email' => $email, 'username' => $username]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!empty($user)) {
-        return false;
-    }
-
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    
-    $sql = "INSERT INTO users (name, email, password) VALUES (:name, :email, :password);";
-    $stmt = getDbConnexion()->prepare($sql);
-    $stmt->execute(['name' => $username, 'email' => $email, 'password' => $hashedPassword]);
-    
-    header('Location: /login.php');
-    exit;
-}
+// Démarrer la session au tout début
+Session::start();
 
 $success = null;
 
-if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    $email = $_POST['email'];
-
-    $success = register($username, $email, $password);
+try {
+    $auth = new AuthController();
+    
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $success = $auth->register($_POST);
+        if ($success) {
+            header('Location: /login.php');
+            exit;
+        }
+    }
+} catch (Exception $e) {
+    $error = $e->getMessage();
 }
 
 ?>
@@ -60,7 +43,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="flex flex-row w-full h-24 bg-gray-900 items-center justify-center">
                 <div class="w-11/12 flex flex-row items-center justify-end space-x-4">
                     <a href="/" class="text-white">Homepage</a>
-                    <?php if (isLoggedIn()): ?>
+                    <?php if (Session::isLoggedIn()): ?>
                         <a href="/blogs/new.php" class="text-white">Create post</a>
                         <a href="/profile.php" class="text-white">Profile</a>
                         <a href="/logout.php" class="text-white">Logout</a>
@@ -71,15 +54,25 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
             <div class="flex flex-col w-11/12 items-center justify-start">
-                <h1 class="text-4xl">Wonderful blog</h1>
+                <h1 class="text-4xl">Register</h1>
+                
+                <?php if (isset($error)): ?>
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <span class="block sm:inline"><?php echo htmlspecialchars($error); ?></span>
+                    </div>
+                <?php endif; ?>
+
                 <form action="/register.php" method="post" class="flex flex-col w-1/2 space-y-4">
                     <?php if ($success === false): ?>
-                        <p class="text-red-500">Invalid credentials</p>
+                        <p class="text-red-500">Registration failed</p>
                     <?php endif; ?>
 
-                    <input type="text" name="username" placeholder="Username" class="p-2 border border-gray-300 rounded">
-                    <input type="email" name="email" placeholder="Email" class="p-2 border border-gray-300 rounded">
-                    <input type="password" name="password" placeholder="Password" class="p-2 border border-gray-300 rounded">
+                    <input type="text" name="username" placeholder="Username" required 
+                           class="p-2 border border-gray-300 rounded">
+                    <input type="email" name="email" placeholder="Email" required 
+                           class="p-2 border border-gray-300 rounded">
+                    <input type="password" name="password" placeholder="Password" required 
+                           class="p-2 border border-gray-300 rounded">
                     <button type="submit" class="p-2 bg-blue-500 text-white rounded">Register</button>
                 </form>
             </div>

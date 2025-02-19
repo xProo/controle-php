@@ -1,8 +1,18 @@
 <?php
-session_start();
 
-function isLoggedIn(): bool {
-    return isset($_SESSION['user_id']);
+require_once __DIR__ . '/vendor/autoload.php';
+
+use App\Controllers\AuthController;
+use App\Services\Session;
+
+// Démarrer la session au tout début
+Session::start();
+
+$success = null;
+$auth = new AuthController();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $success = $auth->login($_POST);
 }
 
 function getDbConnexion(): PDO {
@@ -35,17 +45,6 @@ function login(string $email, string $password) {
     exit;
 }
 
-$success = null;
-
-if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-
-    $success = login($email, $password);
-}
-
-
-
 ?>
 
 <!doctype html>
@@ -61,7 +60,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="flex flex-row w-full h-24 bg-gray-900 items-center justify-center">
                 <div class="w-11/12 flex flex-row items-center justify-end space-x-4">
                     <a href="/" class="text-white">Homepage</a>
-                    <?php if (isLoggedIn()): ?>
+                    <?php if (Session::isLoggedIn()): ?>
                         <a href="/blogs/new.php" class="text-white">Create post</a>
                         <a href="/profile.php" class="text-white">Profile</a>
                         <a href="/logout.php" class="text-white">Logout</a>
