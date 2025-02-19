@@ -1,0 +1,92 @@
+[
+  {
+    "path": "/",
+    "methods": ["GET"],
+    "controller": "BlogController@index"
+  },
+  {
+    "path": "/login",
+    "methods": ["GET"],
+    "controller": "AuthController@loginForm"
+  },
+  {
+    "path": "/login",
+    "methods": ["POST"],
+    "controller": "AuthController@login"
+  },
+  {
+    "path": "/register",
+    "methods": ["GET"],
+    "controller": "AuthController@registerForm"
+  },
+  {
+    "path": "/register",
+    "methods": ["POST"],
+    "controller": "AuthController@register"
+  },
+  {
+    "path": "/logout",
+    "methods": ["GET", "POST"],
+    "controller": "AuthController@logout"
+  },
+  {
+    "path": "/blogs/:id",
+    "methods": ["GET"],
+    "controller": "BlogController@show"
+  },
+  {
+    "path": "/blogs/new",
+    "methods": ["GET"],
+    "controller": "BlogController@createForm"
+  },
+  {
+    "path": "/blogs",
+    "methods": ["POST"],
+    "controller": "BlogController@create"
+  },
+  {
+    "path": "/blogs/:id/comments",
+    "methods": ["POST"],
+    "controller": "CommentController@create"
+  },
+  {
+    "path": "/users/:id",
+    "methods": ["GET"],
+    "controller": "UserController@show"
+  },
+  {
+    "path": "/profile",
+    "methods": ["GET"],
+    "controller": "UserController@profile"
+  },
+  {
+    "path": "/profile",
+    "methods": ["POST"],
+    "controller": "UserController@updateProfile"
+  },
+  {
+    "path": "/api/blogs",
+    "methods": ["GET"],
+    "controller": "Api\\BlogController@index"
+  },
+  {
+    "path": "/api/blogs/:id",
+    "methods": ["GET"],
+    "controller": "Api\\BlogController@show"
+  },
+  {
+    "path": "/api/blogs",
+    "methods": ["POST"],
+    "controller": "Api\\BlogController@create"
+  },
+  {
+    "path": "/api/login",
+    "methods": ["POST"],
+    "controller": "Api\\AuthController@login"
+  },
+  {
+    "path": "/api/register",
+    "methods": ["POST"],
+    "controller": "Api\\AuthController@register"
+  }
+]

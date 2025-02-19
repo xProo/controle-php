@@ -4,6 +4,7 @@ namespace App\Auth;
 
 use App\Models\User;
 use App\Services\Session;
+use App\Lib\Http\Response;
 
 class Login {
     private string $email;
@@ -14,16 +15,19 @@ class Login {
         $this->password = $password;
     }
 
-    public function execute(): bool {
+    public function execute(Response $response): void {
         if ($this->validateInput()) {
             $user = new User('', $this->email, $this->password);
             
             if ($user->login()) {
                 $this->setUserSession($user);
-                return true;
+                $response->json(['message' => 'Login successful', 'user_id' => $user->getId()]);
+            } else {
+                $response->json(['message' => 'Invalid credentials'], 401);
             }
+        } else {
+            $response->json(['message' => 'Email and password are required'], 400);
         }
-        return false;
     }
 
     private function validateInput(): bool {

@@ -1,5 +1,18 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
 session_start();
+
+use App\Lib\Http\Request;
+use App\Lib\Http\Router;
+
+$request = new Request();
+$router = new Router();
+$response = $router->route($request);
+
+// Si une réponse est retournée, on l'envoie
+if ($response) {
+    $response->send();
+}
 
 function getDbConnexion(): PDO {
     $host = 'php-oop-exercice-db';
