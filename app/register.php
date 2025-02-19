@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use App\Controllers\AuthController;
+use App\Auth\Register;
 use App\Services\Session;
 
 // Activer l'affichage des erreurs pour le débogage
@@ -15,10 +15,14 @@ Session::start();
 $success = null;
 
 try {
-    $auth = new AuthController();
-    
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $success = $auth->register($_POST);
+        $register = new Register(
+            $_POST['username'] ?? '',
+            $_POST['email'] ?? '',
+            $_POST['password'] ?? ''
+        );
+        
+        $success = $register->execute();
         if ($success) {
             header('Location: /login.php');
             exit;

@@ -2,17 +2,29 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use App\Controllers\AuthController;
+use App\Auth\Login;
 use App\Services\Session;
 
 // Démarrer la session au tout début
 Session::start();
 
 $success = null;
-$auth = new AuthController();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $success = $auth->login($_POST);
+try {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $login = new Login(
+            $_POST['email'] ?? '',
+            $_POST['password'] ?? ''
+        );
+        
+        $success = $login->execute();
+        if ($success) {
+            header('Location: /');
+            exit;
+        }
+    }
+} catch (Exception $e) {
+    $error = $e->getMessage();
 }
 
 function getDbConnexion(): PDO {
