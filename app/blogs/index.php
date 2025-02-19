@@ -1,5 +1,5 @@
 <?php
-require_once '../vendor/autoload.php'; // Assurez-vous que le chemin est correct
+require_once '../vendor/autoload.php'; 
 
 session_start();
 
